@@ -1,13 +1,19 @@
-build:	## Build: Generate the website from the markdown and configuration files in the directory dist/.
-		hugo --destination ./dist
+build:	## Builds the API binary file using go
+	go build
 
-clean: ## Cleanup the content of the directory dist/
-		rm -rf dist/
+run:	## Runs the built binary and send everything to awesome.log
+	./awesome-api >./awesome.log 2>&1 &
 
-post: ## Post: Create a new blog post whose filename and title come from the environment variables POST_TITLE and POST_NAME.
-		@rm -rf content/posts/$(POST_NAME),md
-		hugo new posts/$(POST_NAME).md
-		sed -i 's+title.*+title: "$(POST_TITLE)"+g' content/posts/$(POST_NAME).md
+stop:	## Terminates the execution of awesome-api
+	kill $(shell pgrep awesome-api)
 
-help: ## prints out the list of targets and their usage.
-		cat README.md
+clean:	## Removes binary and logs
+	make stop
+	rm ./awesome-api awesome.log
+
+test:	## Tests the API using curl
+	curl http://localhost:9999 
+	curl http://localhost:9999/health 
+
+help:	## Show this help message
+	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
